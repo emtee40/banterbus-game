@@ -1,34 +1,39 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	gap "github.com/muesli/go-app-paths"
+	"github.com/sethvargo/go-envconfig"
 )
 
 type Config struct {
-	DBFolder string `mapstructure:"db_folder"`
+	DBFolder    string `env:"DB_FOLDER"`
+	Environment string `env:"ENVIRONMENT" default:"dev"`
+	LogLevel    string `string:"log_level" default:"info"`
 }
 
-func LoadConfig() (Config, error) {
-	config := Config{}
-
-	scope := gap.NewScope(gap.User, "banterbus")
-	dirs, err := scope.DataDirs()
-	if err != nil {
-		return config, fmt.Errorf("unable to get data directory: %v", err)
+func LoadConfig(ctx context.Context) (Config, error) {
+	var config Config
+	if err := envconfig.Process(ctx, &config); err != nil {
+		return config, err
 	}
 
-	dbFolder, _ := os.UserHomeDir()
-	if len(dirs) > 0 {
-		dbFolder = dirs[0]
+	if config.DBFolder == "" {
+		scope := gap.NewScope(gap.User, "banterbus")
+		dirs, err := scope.DataDirs()
+		if err != nil {
+			return config, fmt.Errorf("unable to get data directory: %w", err)
+		}
+
+		dbFolder, _ := os.UserHomeDir()
+		if len(dirs) > 0 {
+			dbFolder = dirs[0]
+		}
+		config.DBFolder = dbFolder
 	}
 
-	if folder, ok := os.LookupEnv("BANTERBUS_DB_FOLDER"); ok {
-		dbFolder = folder
-	}
-
-	config.DBFolder = dbFolder
 	return config, nil
 }
