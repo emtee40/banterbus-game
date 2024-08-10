@@ -1,6 +1,3 @@
-include:
-  - 'https://gitlab.com/Cynerd/gitlab-ci-nix/-/raw/master/template.yml'
-
 image: nixos/nix
 
 .task:
@@ -14,19 +11,9 @@ image: nixos/nix
     - nix develop -c task build:dev
 
 stages:
-  - pre
   - test
   - build
   - release
-
-install:deps:
-  stage: pre
-  extends:
-    - .task
-  only:
-    - merge_request
-  script:
-    - nix develop
 
 lint:
   extends:
