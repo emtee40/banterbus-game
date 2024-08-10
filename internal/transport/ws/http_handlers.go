@@ -87,30 +87,27 @@ func (s *server) subscribe(ctx context.Context, r *http.Request, w http.Response
 
 	// TODO: how to handle error?
 	go func() error {
-		reader := wsutil.NewReader(connection, ws.StateServerSide)
-
 		for {
 			select {
 			case <-quit:
 				return nil
 			default:
-				_, err := reader.NextFrame()
+				_, r, err := wsutil.NextReader(connection, ws.StateServerSide)
 				if err != nil {
 					return err
 				}
 
-				msg := make([]byte, reader.MaxFrameSize)
-				_, err = io.ReadFull(reader, msg)
+				data, err := io.ReadAll(r)
 				if err != nil {
 					return err
 				}
 
 				var message message
-				err = json.Unmarshal(msg, &message)
+				err = json.Unmarshal(data, &message)
+				s.logger.Debug("received message", slog.Any("message", message))
 				if err != nil {
 					return err
 				}
-
 				incomingMessages <- message
 			}
 		}

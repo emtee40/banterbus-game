@@ -53,7 +53,6 @@ test:generate:
     - nix develop -c task generate
     - git diff --exit-code
 
-
 build:binary:
   stage: build
   only:

@@ -11,6 +11,8 @@ tasks:
     deps:
       - generate
     cmds:
+      - templ generate
+      - tailwindcss -i ./static/css/tailwind.css -o ./static/css/styles.css
       - go build -o ./tmp/main .
 
   lint:
@@ -66,11 +68,9 @@ tasks:
       - cat output.txt | go-junit-report -set-exit-code > report.xml
       - gocover-cobertura < coverage.txt > coverage.xml
 
-  generate:
-    desc: Runs all generate commands needed for the server.
+  generate:sqlc:
+    desc: Generates the code to interact with SQL DB.
     cmds:
-      - templ generate
-      - tailwindcss -i ./static/css/tailwind.css -o ./static/css/styles.css
       - sqlc generate
 
   release:
