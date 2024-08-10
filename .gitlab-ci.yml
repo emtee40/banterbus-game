@@ -50,7 +50,7 @@ test:generate:
   extends:
     - .task
   script:
-    - nix develop -c task generate
+    - nix develop -c task generate:sqlc
     - git diff --exit-code
 
 build:binary:
