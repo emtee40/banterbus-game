@@ -5,8 +5,8 @@ image: nixos/nix
 
 .task:
   stage: test
-  # extends: .nix
-  # tags: [docker]
+  extends: .nix
+  tags: []
   only:
     - merge_request
   before_script:
@@ -19,15 +19,15 @@ stages:
   - build
   - release
 
-# install:deps:
-#   stage: pre
-#   extends:
-#     - .task
-#   only:
-#     - merge_request
-#   script:
-#     - nix develop
-#
+install:deps:
+  stage: pre
+  extends:
+    - .task
+  only:
+    - merge_request
+  script:
+    - nix develop
+
 lint:
   extends:
     - .task
@@ -64,8 +64,9 @@ generate:sql:
   extends:
     - .task
   script:
-    - nix develop -c task generate:sql
+    - nix develop -c task generate
     - git diff --exit-code
+
 
 build:binary:
   stage: build
@@ -74,33 +75,23 @@ build:binary:
   extends:
     - .task
   script:
-    - nix develop -c task generate:sql
-    - git diff --exit-code
+    - nix build
 
-# build:binary:
-#   stage: build
-#   only:
-#     - main
-#   extends:
-#     - .task
-#   script:
-#     - nix build
-#
-# build:docker:
-#   stage: build
-#   only:
-#     - tags
-#   needs: []
-#   extends:
-#     - .task
-#   variables:
-#     DOCKER_HOST: tcp://docker:2375
-#     DOCKER_DRIVER: overlay2
-#   services:
-#     - docker:27.0.3-dind
-#   script:
-#     - nix build .#container
-#     - nix develop -c task docker:publish
+build:docker:
+  stage: build
+  only:
+    - tags
+  needs: []
+  extends:
+    - .task
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:27.0.3-dind
+  script:
+    - nix build .#container
+    - nix develop -c task docker:publish
 
 release:
   stage: release
