@@ -86,27 +86,30 @@ func (s *server) subscribe(ctx context.Context, r *http.Request, w http.Response
 	quit := make(chan struct{})
 
 	// TODO: how to handle error?
-	go func() error {
+	go func() {
 		for {
 			select {
 			case <-quit:
-				return nil
+				return
 			default:
 				_, r, err := wsutil.NextReader(connection, ws.StateServerSide)
 				if err != nil {
-					return err
+					s.logger.Error("failed to get next message", slog.Any("error", err))
+					return
 				}
 
 				data, err := io.ReadAll(r)
 				if err != nil {
-					return err
+					s.logger.Error("failed to read message", slog.Any("error", err))
+					return
 				}
 
 				var message message
 				err = json.Unmarshal(data, &message)
 				s.logger.Debug("received message", slog.Any("message", message))
 				if err != nil {
-					return err
+					s.logger.Error("failed to unmarshal message", slog.Any("error", err))
+					return
 				}
 				incomingMessages <- message
 			}
