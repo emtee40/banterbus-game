@@ -8,8 +8,6 @@ tasks:
 
   build:dev:
     desc: Build the app for development, generates all the files needed for the binary.
-    deps:
-      - generate
     cmds:
       - templ generate
       - tailwindcss -i ./static/css/tailwind.css -o ./static/css/styles.css
