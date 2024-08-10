@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -26,6 +27,7 @@ func TestLoadConfig(t *testing.T) {
 		ctx := context.Background()
 		os.Setenv("BANTERBUS_DB_FOLDER", "/home/test")
 		config, err := config.LoadConfig(ctx)
+		fmt.Println(os.Getenv("BANTERBUS_DB_FOLDER"))
 
 		assert.NoError(t, err)
 		assert.Equal(t, "/home/test", config.DBFolder)
