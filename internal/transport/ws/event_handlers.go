@@ -14,7 +14,7 @@ type message struct {
 }
 
 type createRoomData struct {
-	playerNickname string `json:"player_nickname"`
+	playerNickname string `json:"nickname"`
 }
 
 func (s *server) handleRoomCreatedEvent(ctx context.Context, client *client, message message) ([]byte, error) {
@@ -43,7 +43,7 @@ func (s *server) handleRoomCreatedEvent(ctx context.Context, client *client, mes
 
 	go room.runRoom()
 
-	comp := views.Room(newRoom.Code, newRoom.Players)
+	comp := views.Room(newRoom.Code, newRoom.Players, newRoom.Players[0])
 
 	var buf bytes.Buffer
 	err = comp.Render(ctx, &buf)
