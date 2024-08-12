@@ -17,7 +17,7 @@ import (
 )
 
 type RoomServicer interface {
-	CreateRoom(ctx context.Context, roomCode string) (entities.Room, error)
+	CreateRoom(ctx context.Context, roomCode string, playerNickname string) (entities.Room, error)
 }
 
 type RoomRandomizer interface {
