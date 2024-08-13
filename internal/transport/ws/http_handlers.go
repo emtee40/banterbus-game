@@ -20,6 +20,10 @@ type RoomServicer interface {
 	CreateRoom(ctx context.Context, roomCode string, playerNickname string) (entities.Room, error)
 }
 
+type PlayerServicer interface {
+	UpdateNickname(ctx context.Context, nickname string, playerID int64) (entities.Room, error)
+}
+
 type RoomRandomizer interface {
 	GetRoomCode() string
 }
@@ -29,20 +33,23 @@ type server struct {
 	roomRandomizer RoomRandomizer
 	eventHandlers  map[string]func(context.Context, *client, message) ([]byte, error)
 	roomServicer   RoomServicer
+	playerServicer PlayerServicer
 	logger         *slog.Logger
 	mux            http.ServeMux
 }
 
-func NewHTTPServer(roomServicer RoomServicer, roomRandomizer RoomRandomizer, logger *slog.Logger) *server {
+func NewHTTPServer(roomServicer RoomServicer, playerServicer PlayerServicer, roomRandomizer RoomRandomizer, logger *slog.Logger) *server {
 	s := &server{
 		rooms:          make(map[string]*room),
 		roomServicer:   roomServicer,
+		playerServicer: playerServicer,
 		roomRandomizer: roomRandomizer,
 		logger:         logger,
 	}
 
 	s.eventHandlers = map[string]func(context.Context, *client, message) ([]byte, error){
-		"create_room": s.handleCreateRoomEvent,
+		"create_room":     s.handleCreateRoomEvent,
+		"update_nickname": s.handleUpdateNicknameEvent,
 	}
 	s.mux.Handle("/", http.FileServer(http.Dir("./static")))
 	s.mux.HandleFunc("/ws", s.subscribeHandler)

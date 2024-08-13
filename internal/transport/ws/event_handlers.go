@@ -19,6 +19,11 @@ type CreateRoomEvent struct {
 	PlayerNickname string `mapstructure:"player_nickname"`
 }
 
+type UpdateNicknameEvent struct {
+	PlayerNickname string `mapstructure:"update_player_nickname"`
+	PlayerID       int64  `mapstructure:"player_id"`
+}
+
 func (s *server) handleCreateRoomEvent(ctx context.Context, client *client, message message) ([]byte, error) {
 	room := NewRoom()
 
@@ -55,18 +60,19 @@ func (s *server) handleCreateRoomEvent(ctx context.Context, client *client, mess
 	return buf.Bytes(), nil
 }
 
+// TODO: check room state to see if possible
 func (s *server) handleUpdateNicknameEvent(ctx context.Context, client *client, message message) ([]byte, error) {
-	var event CreateRoomEvent
+	var event UpdateNicknameEvent
 	if err := mapstructure.Decode(message.ExtraFields, &event); err != nil {
-		return nil, fmt.Errorf("failed to decode create_room event: %w", err)
+		return nil, fmt.Errorf("failed to decode update_player_nickname event: %w", err)
 	}
 
-	newRoom, err := s.roomServicer.CreateRoom(ctx, code, event.PlayerNickname)
+	updatedRoom, err := s.playerServicer.UpdateNickname(ctx, event.PlayerNickname, event.PlayerID)
 	if err != nil {
 		return nil, err
 	}
 
-	comp := views.Room(newRoom.Code, newRoom.Players, newRoom.Players[0])
+	comp := views.Room(updatedRoom.Code, updatedRoom.Players, updatedRoom.Players[0])
 
 	var buf bytes.Buffer
 	err = comp.Render(ctx, &buf)

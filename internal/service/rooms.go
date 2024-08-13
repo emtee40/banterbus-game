@@ -38,7 +38,7 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, playerNicknam
 		GameName: "fibbing_it",
 		RoomCode: roomCode,
 	}
-	err := r.store.CreateRoom(ctx, newPlayer, newRoom)
+	createdPlayer, err := r.store.CreateRoom(ctx, newPlayer, newRoom)
 	if err != nil {
 		return entities.Room{}, err
 	}
@@ -47,6 +47,7 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, playerNicknam
 		Code: roomCode,
 		Players: []entities.Player{
 			{
+				ID:       createdPlayer.ID,
 				Nickname: nickname,
 				Avatar:   string(avatar),
 			},

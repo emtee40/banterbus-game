@@ -12,6 +12,7 @@ type NewRoom struct {
 }
 
 type Player struct {
+	ID       int64
 	Nickname string
 	Avatar   string
 }
