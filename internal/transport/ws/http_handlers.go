@@ -17,7 +17,7 @@ import (
 )
 
 type RoomServicer interface {
-	CreateRoom(ctx context.Context, roomCode string) (entities.Room, error)
+	CreateRoom(ctx context.Context, roomCode string, playerNickname string) (entities.Room, error)
 }
 
 type RoomRandomizer interface {
@@ -106,7 +106,7 @@ func (s *server) subscribe(ctx context.Context, r *http.Request, w http.Response
 
 				var message message
 				err = json.Unmarshal(data, &message)
-				s.logger.Debug("received message", slog.Any("message", message))
+				s.logger.Info("received message", slog.Any("message", message))
 				if err != nil {
 					s.logger.Error("failed to unmarshal message", slog.Any("error", err))
 					return
