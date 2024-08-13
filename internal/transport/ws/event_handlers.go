@@ -14,7 +14,7 @@ type message struct {
 }
 
 type createRoomData struct {
-	playerNickname string `json:"nickname"`
+	PlayerNickname string `json:"nickname"`
 }
 
 func (s *server) handleRoomCreatedEvent(ctx context.Context, client *client, message message) ([]byte, error) {
@@ -36,7 +36,7 @@ func (s *server) handleRoomCreatedEvent(ctx context.Context, client *client, mes
 	room.addClient(client)
 	s.rooms[code] = room
 
-	newRoom, err := s.roomServicer.CreateRoom(ctx, code, createRoom.playerNickname)
+	newRoom, err := s.roomServicer.CreateRoom(ctx, code, createRoom.PlayerNickname)
 	if err != nil {
 		return nil, err
 	}
