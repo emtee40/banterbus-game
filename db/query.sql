@@ -6,3 +6,17 @@ INSERT INTO players (avatar, nickname, latest_session_id) VALUES (?, ?, ?) RETUR
 
 -- name: AddRoomPlayer :one
 INSERT INTO rooms_players (room_id, player_id) VALUES (?, ?) RETURNING *;
+
+-- name: GetAllPlayersInRoom :many
+SELECT p.*, r.room_code
+FROM players p
+JOIN rooms_players rp ON p.id = rp.player_id
+JOIN rooms r ON rp.room_id = r.id
+WHERE rp.room_id IN (
+    SELECT room_id
+    FROM rooms_players
+    WHERE rp.player_id = ?
+);
+
+-- name: UpdateNickname :one
+UPDATE players SET nickname = ? WHERE id = ? RETURNING *;

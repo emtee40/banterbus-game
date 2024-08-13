@@ -42,7 +42,7 @@ func NewHTTPServer(roomServicer RoomServicer, roomRandomizer RoomRandomizer, log
 	}
 
 	s.eventHandlers = map[string]func(context.Context, *client, message) ([]byte, error){
-		"room_created": s.handleRoomCreatedEvent,
+		"create_room": s.handleCreateRoomEvent,
 	}
 	s.mux.Handle("/", http.FileServer(http.Dir("./static")))
 	s.mux.HandleFunc("/ws", s.subscribeHandler)

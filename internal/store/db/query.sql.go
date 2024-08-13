@@ -7,6 +7,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 )
 
 const addPlayer = `-- name: AddPlayer :one
@@ -75,6 +76,85 @@ func (q *Queries) AddRoomPlayer(ctx context.Context, arg AddRoomPlayerParams) (R
 		&i.PlayerID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAllPlayersInRoom = `-- name: GetAllPlayersInRoom :many
+SELECT p.id, p.created_at, p.updated_at, p.avatar, p.nickname, p.disconnected_at, p.latest_session_id, r.room_code
+FROM players p
+JOIN rooms_players rp ON p.id = rp.player_id
+JOIN rooms r ON rp.room_id = r.id
+WHERE rp.room_id IN (
+    SELECT room_id
+    FROM rooms_players
+    WHERE rp.player_id = ?
+)
+`
+
+type GetAllPlayersInRoomRow struct {
+	ID              int64
+	CreatedAt       sql.NullTime
+	UpdatedAt       sql.NullTime
+	Avatar          []byte
+	Nickname        string
+	DisconnectedAt  sql.NullTime
+	LatestSessionID int64
+	RoomCode        string
+}
+
+func (q *Queries) GetAllPlayersInRoom(ctx context.Context, playerID int64) ([]GetAllPlayersInRoomRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllPlayersInRoom, playerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllPlayersInRoomRow
+	for rows.Next() {
+		var i GetAllPlayersInRoomRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Avatar,
+			&i.Nickname,
+			&i.DisconnectedAt,
+			&i.LatestSessionID,
+			&i.RoomCode,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateNickname = `-- name: UpdateNickname :one
+UPDATE players SET nickname = ? WHERE id = ? RETURNING id, created_at, updated_at, avatar, nickname, disconnected_at, latest_session_id
+`
+
+type UpdateNicknameParams struct {
+	Nickname string
+	ID       int64
+}
+
+func (q *Queries) UpdateNickname(ctx context.Context, arg UpdateNicknameParams) (Player, error) {
+	row := q.db.QueryRowContext(ctx, updateNickname, arg.Nickname, arg.ID)
+	var i Player
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Avatar,
+		&i.Nickname,
+		&i.DisconnectedAt,
+		&i.LatestSessionID,
 	)
 	return i, err
 }

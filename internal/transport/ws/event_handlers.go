@@ -19,7 +19,7 @@ type CreateRoomEvent struct {
 	PlayerNickname string `mapstructure:"player_nickname"`
 }
 
-func (s *server) handleRoomCreatedEvent(ctx context.Context, client *client, message message) ([]byte, error) {
+func (s *server) handleCreateRoomEvent(ctx context.Context, client *client, message message) ([]byte, error) {
 	room := NewRoom()
 
 	var code string
@@ -43,6 +43,28 @@ func (s *server) handleRoomCreatedEvent(ctx context.Context, client *client, mes
 	}
 
 	go room.runRoom()
+
+	comp := views.Room(newRoom.Code, newRoom.Players, newRoom.Players[0])
+
+	var buf bytes.Buffer
+	err = comp.Render(ctx, &buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (s *server) handleUpdateNicknameEvent(ctx context.Context, client *client, message message) ([]byte, error) {
+	var event CreateRoomEvent
+	if err := mapstructure.Decode(message.ExtraFields, &event); err != nil {
+		return nil, fmt.Errorf("failed to decode create_room event: %w", err)
+	}
+
+	newRoom, err := s.roomServicer.CreateRoom(ctx, code, event.PlayerNickname)
+	if err != nil {
+		return nil, err
+	}
 
 	comp := views.Room(newRoom.Code, newRoom.Players, newRoom.Players[0])
 
