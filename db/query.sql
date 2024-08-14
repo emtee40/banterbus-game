@@ -1,5 +1,5 @@
 -- name: AddRoom :one
-INSERT INTO rooms (game_name, host_player, room_code) VALUES (?, ?, ?) RETURNING *;
+INSERT INTO rooms (id, game_name, host_player, room_code) VALUES (?, ?, ?, ?) RETURNING *;
 
 -- name: AddPlayer :one
 INSERT INTO players (id, avatar, nickname) VALUES (?, ?, ?) RETURNING *;

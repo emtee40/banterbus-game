@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/google/uuid"
+
 	"gitlab.com/hmajid2301/banterbus/internal/entities"
 	sqlc "gitlab.com/hmajid2301/banterbus/internal/store/db"
 )
@@ -47,7 +49,9 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		return err
 	}
 
+	u := uuid.Must(uuid.NewV7())
 	newRoom, err := s.queries.WithTx(tx).AddRoom(ctx, sqlc.AddRoomParams{
+		ID:         u.String(),
 		GameName:   room.GameName,
 		RoomCode:   room.RoomCode,
 		HostPlayer: newPlayer.ID,

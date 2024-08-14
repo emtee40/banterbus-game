@@ -34,17 +34,23 @@ func (q *Queries) AddPlayer(ctx context.Context, arg AddPlayerParams) (Player, e
 }
 
 const addRoom = `-- name: AddRoom :one
-INSERT INTO rooms (game_name, host_player, room_code) VALUES (?, ?, ?) RETURNING id, created_at, updated_at, game_name, host_player, room_code
+INSERT INTO rooms (id, game_name, host_player, room_code) VALUES (?, ?, ?, ?) RETURNING id, created_at, updated_at, game_name, host_player, room_code
 `
 
 type AddRoomParams struct {
+	ID         string
 	GameName   string
 	HostPlayer string
 	RoomCode   string
 }
 
 func (q *Queries) AddRoom(ctx context.Context, arg AddRoomParams) (Room, error) {
-	row := q.db.QueryRowContext(ctx, addRoom, arg.GameName, arg.HostPlayer, arg.RoomCode)
+	row := q.db.QueryRowContext(ctx, addRoom,
+		arg.ID,
+		arg.GameName,
+		arg.HostPlayer,
+		arg.RoomCode,
+	)
 	var i Room
 	err := row.Scan(
 		&i.ID,

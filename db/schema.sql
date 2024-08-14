@@ -26,14 +26,3 @@ CREATE TABLE IF NOT EXISTS rooms_players (
     FOREIGN KEY (room_id) REFERENCES rooms (id),
     FOREIGN KEY (player_id) REFERENCES players (id)
 );
-
-CREATE TRIGGER uuid_rooms
-AFTER INSERT ON rooms
-FOR EACH ROW
-WHEN (new.id IS NULL)
-BEGIN
-   UPDATE rooms SET id = (select lower(hex(randomblob(4))) || '-' || hex(randomblob(2))
-             || '-' || '4' || substr(hex(randomblob(2)), 2) || '-'
-             || substr('AB89', 1 + (abs(random()) % 4) , 1)  ||
-             substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))) WHERE id = NEW.id;
-END;
