@@ -25,9 +25,9 @@ func (p *PlayerService) UpdateNickname(ctx context.Context, nickname string, pla
 	var players []entities.Player
 	for _, player := range playerRows {
 		p := entities.Player{
-			ID:       player.ID,
-			Nickname: player.Nickname,
-			Avatar:   string(player.Avatar),
+			AuthToken: player.AuthToken,
+			Nickname:  player.Nickname,
+			Avatar:    string(player.Avatar),
 		}
 
 		players = append(players, p)

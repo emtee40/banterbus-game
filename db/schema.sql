@@ -14,17 +14,26 @@ CREATE TABLE IF NOT EXISTS players (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     avatar BLOB NOT NULL,
-    nickname TEXT NOT NULL,
-    disconnected_at TIMESTAMP DEFAULT NULL,
-    latest_session_id INTEGER NOT NULL
+    nickname TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS rooms_players (
-    room_id TEXT PRIMARY KEY,
-    player_id TEXT PRIMARY KEY,
+    room_id TEXT NOT NULL,
+    player_id TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (room_id, player_id),
     FOREIGN KEY (room_id) REFERENCES rooms (id),
     FOREIGN KEY (player_id) REFERENCES players (id)
 );
+
+CREATE TRIGGER uuid_rooms
+AFTER INSERT ON rooms
+FOR EACH ROW
+WHEN (new.id IS NULL)
+BEGIN
+   UPDATE rooms SET id = (select lower(hex(randomblob(4))) || '-' || hex(randomblob(2))
+             || '-' || '4' || substr(hex(randomblob(2)), 2) || '-'
+             || substr('AB89', 1 + (abs(random()) % 4) , 1)  ||
+             substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6))) WHERE id = NEW.id;
+END;

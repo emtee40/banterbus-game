@@ -22,7 +22,7 @@ func NewRoomService(store store.Store, randomizer UserRandomizer) *RoomService {
 }
 
 // TODO: maybe refactor player info into a struct.
-func (r *RoomService) Create(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error) {
+func (r *RoomService) Create(ctx context.Context, roomCode string, playerAuthToken string, playerNickname string) (entities.Room, error) {
 	nickname := playerNickname
 	if playerNickname == "" {
 		nickname = r.Randomizer.GetNickname()
@@ -30,9 +30,9 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, playerID stri
 
 	avatar := r.Randomizer.GetAvatar()
 	newPlayer := entities.NewPlayer{
-		ID:       playerID,
-		Nickname: nickname,
-		Avatar:   avatar,
+		AuthToken: playerAuthToken,
+		Nickname:  nickname,
+		Avatar:    avatar,
 	}
 
 	newRoom := entities.NewRoom{
@@ -40,7 +40,7 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, playerID stri
 		GameName: "fibbing_it",
 		RoomCode: roomCode,
 	}
-	createdPlayer, err := r.store.CreateRoom(ctx, newPlayer, newRoom)
+	err := r.store.CreateRoom(ctx, newPlayer, newRoom)
 	if err != nil {
 		return entities.Room{}, err
 	}
@@ -49,9 +49,9 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, playerID stri
 		Code: roomCode,
 		Players: []entities.Player{
 			{
-				ID:       createdPlayer.ID,
-				Nickname: nickname,
-				Avatar:   string(avatar),
+				AuthToken: newPlayer.AuthToken,
+				Nickname:  nickname,
+				Avatar:    string(avatar),
 			},
 		},
 	}

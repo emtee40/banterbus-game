@@ -26,10 +26,10 @@ func NewStore(db *sql.DB) (Store, error) {
 	return store, nil
 }
 
-func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room entities.NewRoom) (newPlayer sqlc.Player, err error) {
+func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room entities.NewRoom) (err error) {
 	tx, err := s.db.Begin()
 	if err != nil {
-		return newPlayer, err
+		return err
 	}
 
 	defer func() {
@@ -38,13 +38,13 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		}
 	}()
 
-	newPlayer, err = s.queries.WithTx(tx).AddPlayer(ctx, sqlc.AddPlayerParams{
-		Avatar:          player.Avatar,
-		Nickname:        player.Nickname,
-		LatestSessionID: player.SessionID,
+	newPlayer, err := s.queries.WithTx(tx).AddPlayer(ctx, sqlc.AddPlayerParams{
+		ID:       player.ID,
+		Avatar:   player.Avatar,
+		Nickname: player.Nickname,
 	})
 	if err != nil {
-		return newPlayer, err
+		return err
 	}
 
 	newRoom, err := s.queries.WithTx(tx).AddRoom(ctx, sqlc.AddRoomParams{
@@ -53,7 +53,7 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		HostPlayer: newPlayer.ID,
 	})
 	if err != nil {
-		return newPlayer, err
+		return err
 	}
 
 	_, err = s.queries.WithTx(tx).AddRoomPlayer(ctx, sqlc.AddRoomPlayerParams{
@@ -61,9 +61,9 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		PlayerID: newPlayer.ID,
 	})
 	if err != nil {
-		return newPlayer, err
+		return err
 	}
-	return newPlayer, tx.Commit()
+	return tx.Commit()
 }
 
 func (s Store) UpdateNickname(ctx context.Context, nickname string, playerID string) (players []sqlc.GetAllPlayersInRoomRow, err error) {

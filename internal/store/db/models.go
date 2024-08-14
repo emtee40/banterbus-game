@@ -9,13 +9,11 @@ import (
 )
 
 type Player struct {
-	ID              string
-	CreatedAt       sql.NullTime
-	UpdatedAt       sql.NullTime
-	Avatar          []byte
-	Nickname        string
-	DisconnectedAt  sql.NullTime
-	LatestSessionID int64
+	ID        string
+	CreatedAt sql.NullTime
+	UpdatedAt sql.NullTime
+	Avatar    []byte
+	Nickname  string
 }
 
 type Room struct {

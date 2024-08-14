@@ -173,7 +173,7 @@ func (s *server) subscribe(ctx context.Context, r *http.Request, w http.Response
 				return fmt.Errorf("no handler for event %s", message.EventName)
 			}
 
-			msg, err := handlerFunc(ctx, client, message)
+			err := handlerFunc(ctx, client, message)
 			if err != nil {
 				return err
 			}
