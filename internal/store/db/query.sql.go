@@ -41,7 +41,7 @@ INSERT INTO rooms (game_name, host_player, room_code) VALUES (?, ?, ?) RETURNING
 
 type AddRoomParams struct {
 	GameName   string
-	HostPlayer int64
+	HostPlayer string
 	RoomCode   string
 }
 
@@ -64,8 +64,8 @@ INSERT INTO rooms_players (room_id, player_id) VALUES (?, ?) RETURNING room_id, 
 `
 
 type AddRoomPlayerParams struct {
-	RoomID   int64
-	PlayerID int64
+	RoomID   string
+	PlayerID string
 }
 
 func (q *Queries) AddRoomPlayer(ctx context.Context, arg AddRoomPlayerParams) (RoomsPlayer, error) {
@@ -93,7 +93,7 @@ WHERE rp.room_id IN (
 `
 
 type GetAllPlayersInRoomRow struct {
-	ID              int64
+	ID              string
 	CreatedAt       sql.NullTime
 	UpdatedAt       sql.NullTime
 	Avatar          []byte
@@ -103,7 +103,7 @@ type GetAllPlayersInRoomRow struct {
 	RoomCode        string
 }
 
-func (q *Queries) GetAllPlayersInRoom(ctx context.Context, playerID int64) ([]GetAllPlayersInRoomRow, error) {
+func (q *Queries) GetAllPlayersInRoom(ctx context.Context, playerID string) ([]GetAllPlayersInRoomRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllPlayersInRoom, playerID)
 	if err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ UPDATE players SET nickname = ? WHERE id = ? RETURNING id, created_at, updated_a
 
 type UpdateNicknameParams struct {
 	Nickname string
-	ID       int64
+	ID       string
 }
 
 func (q *Queries) UpdateNickname(ctx context.Context, arg UpdateNicknameParams) (Player, error) {

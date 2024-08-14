@@ -66,7 +66,7 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 	return newPlayer, tx.Commit()
 }
 
-func (s Store) UpdateNickname(ctx context.Context, nickname string, playerID int64) (players []sqlc.GetAllPlayersInRoomRow, err error) {
+func (s Store) UpdateNickname(ctx context.Context, nickname string, playerID string) (players []sqlc.GetAllPlayersInRoomRow, err error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return players, err

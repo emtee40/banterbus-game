@@ -17,11 +17,11 @@ import (
 )
 
 type RoomServicer interface {
-	Create(ctx context.Context, roomCode string, playerNickname string) (entities.Room, error)
+	Create(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error)
 }
 
 type PlayerServicer interface {
-	UpdateNickname(ctx context.Context, nickname string, playerID int64) (entities.Room, error)
+	UpdateNickname(ctx context.Context, nickname string, playerID string) (entities.Room, error)
 }
 
 type RoomRandomizer interface {
@@ -31,7 +31,7 @@ type RoomRandomizer interface {
 type server struct {
 	rooms          map[string]*room
 	roomRandomizer RoomRandomizer
-	eventHandlers  map[string]func(context.Context, *client, message) ([]byte, error)
+	eventHandlers  map[string]func(context.Context, *client, message) error
 	roomServicer   RoomServicer
 	playerServicer PlayerServicer
 	logger         *slog.Logger
@@ -47,7 +47,7 @@ func NewHTTPServer(roomServicer RoomServicer, playerServicer PlayerServicer, roo
 		logger:         logger,
 	}
 
-	s.eventHandlers = map[string]func(context.Context, *client, message) ([]byte, error){
+	s.eventHandlers = map[string]func(context.Context, *client, message) error{
 		"create_room":     s.handleCreateRoomEvent,
 		"update_nickname": s.handleUpdateNicknameEvent,
 	}
@@ -87,7 +87,7 @@ func (m *message) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	// Unmarshal extra fields into ExtraFields map
+	// INFO: Unmarshal extra fields into ExtraFields map, let event handler functions deal with them.
 	var raw map[string]interface{}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
@@ -177,7 +177,6 @@ func (s *server) subscribe(ctx context.Context, r *http.Request, w http.Response
 			if err != nil {
 				return err
 			}
-			client.messages <- msg
 			span.End()
 		}
 	}

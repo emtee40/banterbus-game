@@ -1,6 +1,7 @@
 package entities
 
 type NewPlayer struct {
+	ID        string
 	Nickname  string
 	Avatar    []byte
 	SessionID int64
@@ -12,7 +13,7 @@ type NewRoom struct {
 }
 
 type Player struct {
-	ID       int64
+	ID       string
 	Nickname string
 	Avatar   string
 }

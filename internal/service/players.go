@@ -16,7 +16,7 @@ func NewPlayerService(store store.Store) *PlayerService {
 	return &PlayerService{store: store}
 }
 
-func (p *PlayerService) UpdateNickname(ctx context.Context, nickname string, playerID int64) (entities.Room, error) {
+func (p *PlayerService) UpdateNickname(ctx context.Context, nickname string, playerID string) (entities.Room, error) {
 	playerRows, err := p.store.UpdateNickname(ctx, nickname, playerID)
 	if err != nil {
 		return entities.Room{}, err
@@ -34,7 +34,7 @@ func (p *PlayerService) UpdateNickname(ctx context.Context, nickname string, pla
 	}
 
 	if len(players) == 0 {
-		return entities.Room{}, fmt.Errorf("no players in room, playerID: %d", playerID)
+		return entities.Room{}, fmt.Errorf("no players in room, playerID: %s", playerID)
 	}
 
 	room := entities.Room{
