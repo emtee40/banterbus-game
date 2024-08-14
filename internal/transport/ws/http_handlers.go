@@ -48,8 +48,8 @@ func NewHTTPServer(roomServicer RoomServicer, playerServicer PlayerServicer, roo
 	}
 
 	s.eventHandlers = map[string]func(context.Context, *client, message) error{
-		"create_room":     s.handleCreateRoomEvent,
-		"update_nickname": s.handleUpdateNicknameEvent,
+		"create_room":            s.handleCreateRoomEvent,
+		"update_player_nickname": s.handleUpdateNicknameEvent,
 	}
 	s.mux.Handle("/", http.FileServer(http.Dir("./static")))
 	s.mux.HandleFunc("/ws", s.subscribeHandler)

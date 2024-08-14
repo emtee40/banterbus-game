@@ -20,7 +20,7 @@ type CreateRoomEvent struct {
 }
 
 type UpdateNicknameEvent struct {
-	PlayerNickname string `mapstructure:"update_player_nickname"`
+	PlayerNickname string `mapstructure:"player_nickname"`
 	PlayerID       string `mapstructure:"player_id"`
 }
 
