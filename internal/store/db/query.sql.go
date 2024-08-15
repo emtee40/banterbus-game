@@ -89,10 +89,10 @@ SELECT p.id, p.created_at, p.updated_at, p.avatar, p.nickname, r.room_code
 FROM players p
 JOIN rooms_players rp ON p.id = rp.player_id
 JOIN rooms r ON rp.room_id = r.id
-WHERE rp.room_id IN (
-    SELECT room_id
-    FROM rooms_players
-    WHERE rp.player_id = ?
+WHERE rp.room_id = (
+    SELECT rp_inner.room_id
+    FROM rooms_players rp_inner
+    WHERE rp_inner.player_id = ?
 )
 `
 
