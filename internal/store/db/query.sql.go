@@ -135,6 +135,17 @@ func (q *Queries) GetAllPlayersInRoom(ctx context.Context, playerID string) ([]G
 	return items, nil
 }
 
+const getRoomByCode = `-- name: GetRoomByCode :one
+SELECT id FROM rooms WHERE room_code = ?
+`
+
+func (q *Queries) GetRoomByCode(ctx context.Context, roomCode string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getRoomByCode, roomCode)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
 const updateAvatar = `-- name: UpdateAvatar :one
 UPDATE players SET avatar = ? WHERE id = ? RETURNING id, created_at, updated_at, avatar, nickname
 `

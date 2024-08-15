@@ -57,3 +57,36 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, playerID stri
 	}
 	return room, nil
 }
+
+// TODO: check room game
+func (r *RoomService) Join(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error) {
+	nickname := playerNickname
+	if playerNickname == "" {
+		nickname = r.Randomizer.GetNickname()
+	}
+
+	avatar := r.Randomizer.GetAvatar()
+	newPlayer := entities.NewPlayer{
+		ID:       playerID,
+		Nickname: nickname,
+		Avatar:   avatar,
+	}
+
+	err := r.store.AddPlayerToRoom(ctx, newPlayer, roomCode)
+	if err != nil {
+		return entities.Room{}, err
+	}
+
+	// TODO: refactor this room data
+	room := entities.Room{
+		Code: roomCode,
+		Players: []entities.Player{
+			{
+				ID:       playerID,
+				Nickname: nickname,
+				Avatar:   string(avatar),
+			},
+		},
+	}
+	return room, nil
+}

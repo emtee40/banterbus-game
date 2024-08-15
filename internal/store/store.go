@@ -70,7 +70,7 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 	return tx.Commit()
 }
 
-func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, roomID string) (err error) {
+func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, roomCode string) (err error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
@@ -87,6 +87,11 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 		Avatar:   player.Avatar,
 		Nickname: player.Nickname,
 	})
+	if err != nil {
+		return err
+	}
+
+	roomID, err := s.queries.WithTx(tx).GetRoomByCode(ctx, roomCode)
 	if err != nil {
 		return err
 	}
