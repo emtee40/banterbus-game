@@ -70,6 +70,37 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 	return tx.Commit()
 }
 
+func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, roomID string) (err error) {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			err = tx.Rollback()
+		}
+	}()
+
+	newPlayer, err := s.queries.WithTx(tx).AddPlayer(ctx, sqlc.AddPlayerParams{
+		ID:       player.ID,
+		Avatar:   player.Avatar,
+		Nickname: player.Nickname,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = s.queries.WithTx(tx).AddRoomPlayer(ctx, sqlc.AddRoomPlayerParams{
+		RoomID:   roomID,
+		PlayerID: newPlayer.ID,
+	})
+	if err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 func (s Store) UpdateNickname(ctx context.Context, nickname string, playerID string) (players []sqlc.GetAllPlayersInRoomRow, err error) {
 	tx, err := s.db.Begin()
 	if err != nil {

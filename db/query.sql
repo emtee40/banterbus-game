@@ -18,6 +18,9 @@ WHERE rp.room_id IN (
     WHERE rp.player_id = ?
 );
 
+-- name: GetRoomByCode :one
+SELECT id FROM rooms WHERE room_code = ?;
+
 -- name: UpdateNickname :one
 UPDATE players SET nickname = ? WHERE id = ? RETURNING *;
 
