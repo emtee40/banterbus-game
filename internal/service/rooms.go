@@ -72,21 +72,26 @@ func (r *RoomService) Join(ctx context.Context, roomCode string, playerID string
 		Avatar:   avatar,
 	}
 
-	err := r.store.AddPlayerToRoom(ctx, newPlayer, roomCode)
+	playerRows, err := r.store.AddPlayerToRoom(ctx, newPlayer, roomCode)
 	if err != nil {
 		return entities.Room{}, err
 	}
 
+	var players []entities.Player
+	for _, player := range playerRows {
+		p := entities.Player{
+			ID:       player.ID,
+			Nickname: player.Nickname,
+			Avatar:   string(player.Avatar),
+		}
+
+		players = append(players, p)
+	}
+
 	// TODO: refactor this room data
 	room := entities.Room{
-		Code: roomCode,
-		Players: []entities.Player{
-			{
-				ID:       playerID,
-				Nickname: nickname,
-				Avatar:   string(avatar),
-			},
-		},
+		Code:    roomCode,
+		Players: players,
 	}
 	return room, nil
 }

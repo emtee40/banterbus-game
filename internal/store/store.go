@@ -70,10 +70,10 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 	return tx.Commit()
 }
 
-func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, roomCode string) (err error) {
+func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, roomCode string) (players []sqlc.GetAllPlayersInRoomRow, err error) {
 	tx, err := s.db.Begin()
 	if err != nil {
-		return err
+		return players, err
 	}
 
 	defer func() {
@@ -88,12 +88,12 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 		Nickname: player.Nickname,
 	})
 	if err != nil {
-		return err
+		return players, err
 	}
 
 	roomID, err := s.queries.WithTx(tx).GetRoomByCode(ctx, roomCode)
 	if err != nil {
-		return err
+		return players, err
 	}
 
 	_, err = s.queries.WithTx(tx).AddRoomPlayer(ctx, sqlc.AddRoomPlayerParams{
@@ -101,9 +101,15 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 		PlayerID: newPlayer.ID,
 	})
 	if err != nil {
-		return err
+		return players, err
 	}
-	return tx.Commit()
+
+	players, err = s.queries.WithTx(tx).GetAllPlayersInRoom(ctx, player.ID)
+	if err != nil {
+		return players, err
+	}
+
+	return players, tx.Commit()
 }
 
 func (s Store) UpdateNickname(ctx context.Context, nickname string, playerID string) (players []sqlc.GetAllPlayersInRoomRow, err error) {
