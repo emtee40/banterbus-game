@@ -80,6 +80,7 @@ func (s *server) handleUpdateNicknameEvent(ctx context.Context, client *client, 
 
 	var buf bytes.Buffer
 
+	// TODO: refactor this to a function
 	clientsInRoom := s.rooms[updatedRoom.Code].clients
 	for _, player := range updatedRoom.Players {
 		client := clientsInRoom[player.ID]
