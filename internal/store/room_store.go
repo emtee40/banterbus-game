@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -16,6 +17,20 @@ import (
 type Store struct {
 	db      *sql.DB
 	queries *sqlc.Queries
+}
+
+type RoomState int
+
+const (
+	CREATED RoomState = iota
+	STARTED
+	PAUSED
+	FINISHED
+	ABANDONED
+)
+
+func (rs RoomState) String() string {
+	return [...]string{"CREATED", "STARTED", "PAUSED", "FINISHED", "ABANDONED"}[rs]
 }
 
 func NewStore(db *sql.DB) (Store, error) {
@@ -54,6 +69,7 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		ID:         u.String(),
 		GameName:   room.GameName,
 		RoomCode:   room.RoomCode,
+		RoomState:  CREATED.String(),
 		HostPlayer: newPlayer.ID,
 	})
 	if err != nil {
@@ -82,6 +98,15 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 		}
 	}()
 
+	room, err := s.queries.WithTx(tx).GetRoomByCode(ctx, roomCode)
+	if err != nil {
+		return players, err
+	}
+
+	if room.RoomState != CREATED.String() {
+		return players, fmt.Errorf("room is not in CREATED state")
+	}
+
 	newPlayer, err := s.queries.WithTx(tx).AddPlayer(ctx, sqlc.AddPlayerParams{
 		ID:       player.ID,
 		Avatar:   player.Avatar,
@@ -91,13 +116,8 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 		return players, err
 	}
 
-	roomID, err := s.queries.WithTx(tx).GetRoomByCode(ctx, roomCode)
-	if err != nil {
-		return players, err
-	}
-
 	_, err = s.queries.WithTx(tx).AddRoomPlayer(ctx, sqlc.AddRoomPlayerParams{
-		RoomID:   roomID,
+		RoomID:   room.ID,
 		PlayerID: newPlayer.ID,
 	})
 	if err != nil {

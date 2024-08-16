@@ -76,7 +76,6 @@ func (r *RoomService) Join(ctx context.Context, roomCode string, playerID string
 		return entities.Room{}, err
 	}
 
-	// TODO: refactor this room data
 	room := getRoom(playerRows, roomCode)
 	return room, nil
 }

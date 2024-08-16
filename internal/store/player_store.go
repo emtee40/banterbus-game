@@ -45,6 +45,10 @@ func (s Store) UpdateNickname(ctx context.Context, nickname string, playerID str
 			err = tx.Rollback()
 		}
 	}()
+	room, err := s.queries.WithTx(tx).GetRoomByPlayerID(ctx, playerID)
+	if err != nil {
+		return players, err
+	}
 
 	_, err = s.queries.WithTx(tx).UpdateNickname(ctx, sqlc.UpdateNicknameParams{
 		Nickname: nickname,
