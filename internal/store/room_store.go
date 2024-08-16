@@ -57,10 +57,9 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		}
 	}()
 
-	var code string
 	for {
-		code = randomRoomCode()
-		room, err := s.queries.WithTx(tx).GetRoomByCode(ctx, code)
+		roomCode = randomRoomCode()
+		room, err := s.queries.WithTx(tx).GetRoomByCode(ctx, roomCode)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				break
