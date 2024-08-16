@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/hmajid2301/banterbus/internal/entities"
 	"gitlab.com/hmajid2301/banterbus/internal/views"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -51,7 +52,11 @@ func (s *server) handleCreateRoomEvent(ctx context.Context, client *client, mess
 	room.addClient(client)
 	s.rooms[code] = room
 
-	newRoom, err := s.roomServicer.Create(ctx, code, client.playerID, event.PlayerNickname)
+	newPlayer := entities.CreateRoomPlayer{
+		ID:       client.playerID,
+		Nickname: event.PlayerNickname,
+	}
+	newRoom, err := s.roomServicer.Create(ctx, code, newPlayer)
 	if err != nil {
 		return err
 	}

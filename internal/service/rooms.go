@@ -21,16 +21,15 @@ func NewRoomService(store store.Store, randomizer UserRandomizer) *RoomService {
 	return &RoomService{store: store, Randomizer: randomizer}
 }
 
-// TODO: maybe refactor player info into a struct.
-func (r *RoomService) Create(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error) {
-	nickname := playerNickname
-	if playerNickname == "" {
+func (r *RoomService) Create(ctx context.Context, roomCode string, player entities.CreateRoomPlayer) (entities.Room, error) {
+	nickname := player.Nickname
+	if player.Nickname == "" {
 		nickname = r.Randomizer.GetNickname()
 	}
 
 	avatar := r.Randomizer.GetAvatar()
 	newPlayer := entities.NewPlayer{
-		ID:       playerID,
+		ID:       player.ID,
 		Nickname: nickname,
 		Avatar:   avatar,
 	}
@@ -49,7 +48,7 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, playerID stri
 		Code: roomCode,
 		Players: []entities.Player{
 			{
-				ID:       playerID,
+				ID:       player.ID,
 				Nickname: nickname,
 				Avatar:   string(avatar),
 			},
@@ -77,21 +76,7 @@ func (r *RoomService) Join(ctx context.Context, roomCode string, playerID string
 		return entities.Room{}, err
 	}
 
-	var players []entities.Player
-	for _, player := range playerRows {
-		p := entities.Player{
-			ID:       player.ID,
-			Nickname: player.Nickname,
-			Avatar:   string(player.Avatar),
-		}
-
-		players = append(players, p)
-	}
-
 	// TODO: refactor this room data
-	room := entities.Room{
-		Code:    roomCode,
-		Players: players,
-	}
+	room := getRoom(playerRows, roomCode)
 	return room, nil
 }

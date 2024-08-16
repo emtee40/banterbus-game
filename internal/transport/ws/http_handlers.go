@@ -17,7 +17,7 @@ import (
 )
 
 type RoomServicer interface {
-	Create(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error)
+	Create(ctx context.Context, roomCode string, player entities.CreateRoomPlayer) (entities.Room, error)
 	Join(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error)
 }
 
