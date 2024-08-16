@@ -157,12 +157,12 @@ func (q *Queries) GetRoomByCode(ctx context.Context, roomCode string) (Room, err
 	return i, err
 }
 
-const getRoomFromPlayerID = `-- name: GetRoomFromPlayerID :one
+const getRoomByPlayerID = `-- name: GetRoomByPlayerID :one
 SELECT r.id, r.created_at, r.updated_at, r.game_name, r.host_player, r.room_state, r.room_code FROM rooms r JOIN rooms_players rp ON r.id = rp.room_id WHERE rp.player_id = ?
 `
 
-func (q *Queries) GetRoomFromPlayerID(ctx context.Context, playerID string) (Room, error) {
-	row := q.db.QueryRowContext(ctx, getRoomFromPlayerID, playerID)
+func (q *Queries) GetRoomByPlayerID(ctx context.Context, playerID string) (Room, error) {
+	row := q.db.QueryRowContext(ctx, getRoomByPlayerID, playerID)
 	var i Room
 	err := row.Scan(
 		&i.ID,

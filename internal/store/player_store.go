@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 
 	sqlc "gitlab.com/hmajid2301/banterbus/internal/store/db"
 )
@@ -17,6 +18,15 @@ func (s Store) UpdateAvatar(ctx context.Context, avatar []byte, playerID string)
 			err = tx.Rollback()
 		}
 	}()
+
+	room, err := s.queries.WithTx(tx).GetRoomByPlayerID(ctx, playerID)
+	if err != nil {
+		return players, err
+	}
+
+	if room.RoomState != CREATED.String() {
+		return players, fmt.Errorf("room is not in CREATED state")
+	}
 
 	_, err = s.queries.WithTx(tx).UpdateAvatar(ctx, sqlc.UpdateAvatarParams{
 		Avatar: avatar,
@@ -45,9 +55,15 @@ func (s Store) UpdateNickname(ctx context.Context, nickname string, playerID str
 			err = tx.Rollback()
 		}
 	}()
+
 	room, err := s.queries.WithTx(tx).GetRoomByPlayerID(ctx, playerID)
 	if err != nil {
 		return players, err
+	}
+
+	if room.RoomState != CREATED.String() {
+		return players, fmt.Errorf("room is not in CREATED state")
+
 	}
 
 	_, err = s.queries.WithTx(tx).UpdateNickname(ctx, sqlc.UpdateNicknameParams{
