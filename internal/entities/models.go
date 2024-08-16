@@ -13,7 +13,6 @@ type NewPlayer struct {
 
 type NewRoom struct {
 	GameName string
-	RoomCode string
 }
 
 type Player struct {

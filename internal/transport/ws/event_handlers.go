@@ -40,19 +40,6 @@ func (s *server) handleCreateRoomEvent(ctx context.Context, client *client, mess
 		return fmt.Errorf("failed to decode create_room event: %w", err)
 	}
 
-	room := NewRoom()
-
-	var code string
-	for {
-		code = s.roomRandomizer.GetRoomCode()
-		if _, exists := s.rooms[code]; !exists {
-			break
-		}
-	}
-
-	room.addClient(client)
-	s.rooms[code] = room
-
 	newPlayer := entities.CreateRoomPlayer{
 		ID:       client.playerID,
 		Nickname: event.PlayerNickname,
@@ -61,6 +48,11 @@ func (s *server) handleCreateRoomEvent(ctx context.Context, client *client, mess
 	if err != nil {
 		return err
 	}
+
+	room := NewRoom()
+
+	room.addClient(client)
+	s.rooms[code] = room
 
 	go room.runRoom()
 

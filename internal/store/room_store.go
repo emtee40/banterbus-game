@@ -3,8 +3,10 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"io/fs"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 
@@ -26,7 +28,7 @@ const (
 	STARTED
 	PAUSED
 	FINISHED
-	ABANDONED
+	ABOUNDED
 )
 
 func (rs RoomState) String() string {
@@ -43,10 +45,10 @@ func NewStore(db *sql.DB) (Store, error) {
 	return store, nil
 }
 
-func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room entities.NewRoom) (err error) {
+func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room entities.NewRoom) (roomCode string, err error) {
 	tx, err := s.db.Begin()
 	if err != nil {
-		return err
+		return roomCode, err
 	}
 
 	defer func() {
@@ -55,25 +57,42 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		}
 	}()
 
+	var code string
+	for {
+		code = randomRoomCode()
+		room, err := s.queries.WithTx(tx).GetRoomByCode(ctx, code)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				break
+			}
+
+			return roomCode, err
+		}
+
+		if room.RoomState == FINISHED.String() || room.RoomState == ABOUNDED.String() {
+			break
+		}
+	}
+
 	newPlayer, err := s.queries.WithTx(tx).AddPlayer(ctx, sqlc.AddPlayerParams{
 		ID:       player.ID,
 		Avatar:   player.Avatar,
 		Nickname: player.Nickname,
 	})
 	if err != nil {
-		return err
+		return roomCode, err
 	}
 
 	u := uuid.Must(uuid.NewV7())
 	newRoom, err := s.queries.WithTx(tx).AddRoom(ctx, sqlc.AddRoomParams{
 		ID:         u.String(),
 		GameName:   room.GameName,
-		RoomCode:   room.RoomCode,
+		RoomCode:   roomCode,
 		RoomState:  CREATED.String(),
 		HostPlayer: newPlayer.ID,
 	})
 	if err != nil {
-		return err
+		return roomCode, err
 	}
 
 	_, err = s.queries.WithTx(tx).AddRoomPlayer(ctx, sqlc.AddRoomPlayerParams{
@@ -81,9 +100,9 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		PlayerID: newPlayer.ID,
 	})
 	if err != nil {
-		return err
+		return roomCode, err
 	}
-	return tx.Commit()
+	return roomCode, tx.Commit()
 }
 
 func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, roomCode string) (players []sqlc.GetAllPlayersInRoomRow, err error) {
@@ -149,4 +168,15 @@ func GetDB(dbFolder string) (*sql.DB, error) {
 
 	_, err = db.Exec("PRAGMA journal_mode=WAL")
 	return db, err
+}
+
+func randomRoomCode() string {
+	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	codeByte := make([]byte, 5)
+	for i := range codeByte {
+		codeByte[i] = charset[rand.IntN(len(charset))]
+	}
+	code := string(codeByte)
+	return code
 }

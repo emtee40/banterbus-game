@@ -21,7 +21,7 @@ func NewRoomService(store store.Store, randomizer UserRandomizer) *RoomService {
 	return &RoomService{store: store, Randomizer: randomizer}
 }
 
-func (r *RoomService) Create(ctx context.Context, roomCode string, player entities.CreateRoomPlayer) (entities.Room, error) {
+func (r *RoomService) Create(ctx context.Context, gameName string, player entities.CreateRoomPlayer) (entities.Room, error) {
 	nickname := player.Nickname
 	if player.Nickname == "" {
 		nickname = r.Randomizer.GetNickname()
@@ -35,11 +35,9 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, player entiti
 	}
 
 	newRoom := entities.NewRoom{
-		// TODO: don't hardcode game name
-		GameName: "fibbing_it",
-		RoomCode: roomCode,
+		GameName: gameName,
 	}
-	err := r.store.CreateRoom(ctx, newPlayer, newRoom)
+	roomCode, err := r.store.CreateRoom(ctx, newPlayer, newRoom)
 	if err != nil {
 		return entities.Room{}, err
 	}
@@ -57,7 +55,6 @@ func (r *RoomService) Create(ctx context.Context, roomCode string, player entiti
 	return room, nil
 }
 
-// TODO: check room game
 func (r *RoomService) Join(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error) {
 	nickname := playerNickname
 	if playerNickname == "" {
