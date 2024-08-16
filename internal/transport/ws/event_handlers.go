@@ -17,6 +17,7 @@ type message struct {
 }
 
 type CreateRoomEvent struct {
+	GameName       string `mapstructure:"game_name"`
 	PlayerNickname string `mapstructure:"player_nickname"`
 }
 
@@ -44,7 +45,7 @@ func (s *server) handleCreateRoomEvent(ctx context.Context, client *client, mess
 		ID:       client.playerID,
 		Nickname: event.PlayerNickname,
 	}
-	newRoom, err := s.roomServicer.Create(ctx, code, newPlayer)
+	newRoom, err := s.roomServicer.Create(ctx, event.GameName, newPlayer)
 	if err != nil {
 		return err
 	}
@@ -52,7 +53,7 @@ func (s *server) handleCreateRoomEvent(ctx context.Context, client *client, mess
 	room := NewRoom()
 
 	room.addClient(client)
-	s.rooms[code] = room
+	s.rooms[newRoom.Code] = room
 
 	go room.runRoom()
 
