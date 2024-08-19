@@ -20,7 +20,7 @@ type GenerateNewAvatarEvent struct {
 	PlayerID string `mapstructure:"player_id"`
 }
 
-func (h *UpdateNicknameEvent) Handler(ctx context.Context, client *client, sub *subscriber) error {
+func (h *UpdateNicknameEvent) Handle(ctx context.Context, client *client, sub *subscriber) error {
 	updatedRoom, err := sub.playerServicer.UpdateNickname(ctx, h.PlayerNickname, h.PlayerID)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func (h *UpdateNicknameEvent) Handler(ctx context.Context, client *client, sub *
 	return err
 }
 
-func (h *GenerateNewAvatarEvent) Handler(ctx context.Context, client *client, sub *subscriber) error {
+func (h *GenerateNewAvatarEvent) Handle(ctx context.Context, client *client, sub *subscriber) error {
 	updatedRoom, err := sub.playerServicer.GenerateNewAvatar(ctx, h.PlayerID)
 	if err != nil {
 		return err
