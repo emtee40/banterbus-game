@@ -5,10 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"io/fs"
 	"math/rand/v2"
-	"os"
-	"path/filepath"
 
 	"github.com/google/uuid"
 
@@ -25,14 +22,14 @@ type RoomState int
 
 const (
 	CREATED RoomState = iota
-	STARTED
+	PLAYING
 	PAUSED
 	FINISHED
-	ABOUNDED
+	ABANDONED
 )
 
 func (rs RoomState) String() string {
-	return [...]string{"CREATED", "STARTED", "PAUSED", "FINISHED", "ABANDONED"}[rs]
+	return [...]string{"CREATED", "PLAYING", "PAUSED", "FINISHED", "ABANDONED"}[rs]
 }
 
 func NewStore(db *sql.DB) (Store, error) {
@@ -68,7 +65,7 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 			return roomCode, err
 		}
 
-		if room.RoomState == FINISHED.String() || room.RoomState == ABOUNDED.String() {
+		if room.RoomState == FINISHED.String() || room.RoomState == ABANDONED.String() {
 			break
 		}
 	}
@@ -122,7 +119,8 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 	}
 
 	if room.RoomState != CREATED.String() {
-		return players, fmt.Errorf("room is not in CREATED state")
+		err = fmt.Errorf("room is not in CREATED state")
+		return players, err
 	}
 
 	newPlayer, err := s.queries.WithTx(tx).AddPlayer(ctx, sqlc.AddPlayerParams{
@@ -148,25 +146,6 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 	}
 
 	return players, tx.Commit()
-}
-
-func GetDB(dbFolder string) (*sql.DB, error) {
-	if _, err := os.Stat(dbFolder); os.IsNotExist(err) {
-		permissions := 0755
-		err = os.Mkdir(dbFolder, fs.FileMode(permissions))
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	dbPath := filepath.Join(dbFolder, "banterbus.db")
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = db.Exec("PRAGMA journal_mode=WAL")
-	return db, err
 }
 
 func randomRoomCode() string {

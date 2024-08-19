@@ -42,6 +42,7 @@ in
       go-junit-report
       gocover-cobertura
       go-task
+      go-mockery
       goreleaser
       templ
 
