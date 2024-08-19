@@ -9,23 +9,23 @@ import (
 	"gitlab.com/hmajid2301/banterbus/internal/views"
 )
 
-// TODO: refactor to anotther package
+// TODO: refactor to another package
 type RoomServicer interface {
 	Create(ctx context.Context, gameName string, player entities.CreateRoomPlayer) (entities.Room, error)
 	Join(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error)
 }
 
 type CreateRoomEvent struct {
-	GameName       string `mapstructure:"game_name"`
-	PlayerNickname string `mapstructure:"player_nickname"`
+	GameName       string `json:"game_name"`
+	PlayerNickname string `json:"player_nickname"`
 }
 
 type JoinRoomEvent struct {
-	PlayerNickname string `mapstructure:"player_nickname"`
-	RoomCode       string `mapstructure:"room_code"`
+	PlayerNickname string `json:"player_nickname"`
+	RoomCode       string `json:"room_code"`
 }
 
-func (h *CreateRoomEvent) Handler(ctx context.Context, client *client, sub *subscriber) error {
+func (h *CreateRoomEvent) Handle(ctx context.Context, client *client, sub *subscriber) error {
 	newPlayer := entities.CreateRoomPlayer{
 		ID:       client.playerID,
 		Nickname: h.PlayerNickname,
@@ -46,7 +46,7 @@ func (h *CreateRoomEvent) Handler(ctx context.Context, client *client, sub *subs
 	return err
 }
 
-func (h *JoinRoomEvent) Handler(ctx context.Context, client *client, sub *subscriber) error {
+func (h *JoinRoomEvent) Handle(ctx context.Context, client *client, sub *subscriber) error {
 	room, ok := sub.rooms[h.RoomCode]
 	if !ok {
 		return fmt.Errorf("room with code %s does not exist", h.RoomCode)

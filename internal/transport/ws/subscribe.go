@@ -24,11 +24,11 @@ type subscriber struct {
 }
 
 type message struct {
-	EventName string `json:"event_name"`
+	MessageType string `json:"message_type"`
 }
 
 type WSHandler interface {
-	Handler(ctx context.Context, client *client, sub *subscriber) error
+	Handle(ctx context.Context, client *client, sub *subscriber) error
 }
 
 func NewSubscriber(roomServicer RoomServicer, playerServicer PlayerServicer, logger *slog.Logger) *subscriber {
@@ -109,9 +109,9 @@ func (s *subscriber) handleMessage(ctx context.Context, quit <-chan struct{}, co
 				s.logger.Error("failed to unmarshal message", slog.Any("error", err))
 				return
 			}
-			ctx, span := tracer.Start(ctx, message.EventName)
-			s.logger.DebugContext(ctx, fmt.Sprintf("handle `%s` event", message.EventName))
-			handler, ok := s.eventHandlers[message.EventName]
+			ctx, span := tracer.Start(ctx, message.MessageType)
+			s.logger.DebugContext(ctx, fmt.Sprintf("handle `%s` event", message.MessageType))
+			handler, ok := s.eventHandlers[message.MessageType]
 			if !ok {
 				s.logger.Error("handler not found for event", slog.Any("error", err))
 				return
@@ -124,7 +124,7 @@ func (s *subscriber) handleMessage(ctx context.Context, quit <-chan struct{}, co
 				return
 			}
 
-			err = handler.Handler(ctx, client, s)
+			err = handler.Handle(ctx, client, s)
 			if err != nil {
 				s.logger.Error("error in handler function", slog.Any("error", err))
 				return
