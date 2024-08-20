@@ -13,7 +13,6 @@ import (
 	_ "modernc.org/sqlite"
 
 	"gitlab.com/hmajid2301/banterbus/internal/config"
-	"gitlab.com/hmajid2301/banterbus/internal/random"
 	"gitlab.com/hmajid2301/banterbus/internal/service"
 	"gitlab.com/hmajid2301/banterbus/internal/store"
 	transporthttp "gitlab.com/hmajid2301/banterbus/internal/transport/http"
@@ -64,9 +63,8 @@ func mainLogic(ctx context.Context, logger *slog.Logger) error {
 		return fmt.Errorf("failed to setup store: %w", err)
 	}
 
-	userRandomizer := random.NewUserRandomizer()
-	roomServicer := service.NewRoomService(myStore, userRandomizer)
-	playerServicer := service.NewPlayerService(myStore, userRandomizer)
+	roomServicer := service.NewRoomService(myStore)
+	playerServicer := service.NewPlayerService(myStore)
 	subscriber := ws.NewSubscriber(roomServicer, playerServicer, logger)
 	server := transporthttp.NewServer(subscriber, logger)
 

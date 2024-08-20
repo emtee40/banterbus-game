@@ -10,10 +10,10 @@ import (
 
 type PlayerService struct {
 	store      store.Store
-	randomizer UserRandomizer
+	randomizer Randomizer
 }
 
-func NewPlayerService(store store.Store, randomizer UserRandomizer) *PlayerService {
+func NewPlayerService(store store.Store, randomizer Randomizer) *PlayerService {
 	return &PlayerService{store: store, randomizer: randomizer}
 }
 

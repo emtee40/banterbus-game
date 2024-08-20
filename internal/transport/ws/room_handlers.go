@@ -11,7 +11,7 @@ import (
 
 // TODO: refactor to another package
 type RoomServicer interface {
-	Create(ctx context.Context, gameName string, player entities.CreateRoomPlayer) (entities.Room, error)
+	Create(ctx context.Context, gameName string, player entities.NewHostPlayer) (entities.Room, error)
 	Join(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error)
 }
 
@@ -26,7 +26,7 @@ type JoinRoomEvent struct {
 }
 
 func (h *CreateRoomEvent) Handle(ctx context.Context, client *client, sub *subscriber) error {
-	newPlayer := entities.CreateRoomPlayer{
+	newPlayer := entities.NewHostPlayer{
 		ID:       client.playerID,
 		Nickname: h.PlayerNickname,
 	}
