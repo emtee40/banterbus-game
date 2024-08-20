@@ -2,7 +2,6 @@ package store_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -130,9 +129,8 @@ func TestIntegrationAddPlayerToRoom(t *testing.T) {
 		roomCode, err := createRoom(ctx, myStore)
 		assert.NoError(t, err)
 
-		res, err := db.ExecContext(ctx, "UPDATE rooms SET room_state = 'PLAYING' WHERE room_code = ?", roomCode)
+		_, err = db.ExecContext(ctx, "UPDATE rooms SET room_state = 'PLAYING' WHERE room_code = ?", roomCode)
 		assert.NoError(t, err)
-		fmt.Println(res)
 
 		newPlayer := entities.NewPlayer{
 			ID:       "123",
