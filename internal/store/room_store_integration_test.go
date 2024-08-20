@@ -143,5 +143,4 @@ func TestIntegrationAddPlayerToRoom(t *testing.T) {
 		assert.Error(t, err)
 		assert.Empty(t, player)
 	})
-
 }

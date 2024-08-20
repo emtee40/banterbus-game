@@ -50,7 +50,10 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 
 	defer func() {
 		if err != nil {
-			err = tx.Rollback()
+			rbErr := tx.Rollback()
+			if rbErr != nil {
+				err = fmt.Errorf("failed to rollback: %w; while handling this error: %w", rbErr, err)
+			}
 		}
 	}()
 
@@ -109,7 +112,10 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 
 	defer func() {
 		if err != nil {
-			err = tx.Rollback()
+			rbErr := tx.Rollback()
+			if rbErr != nil {
+				err = fmt.Errorf("failed to rollback: %w; while handling this error: %w", rbErr, err)
+			}
 		}
 	}()
 
@@ -119,8 +125,7 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 	}
 
 	if room.RoomState != CREATED.String() {
-		err = fmt.Errorf("room is not in CREATED state")
-		return players, err
+		return players, fmt.Errorf("room is not in CREATED state")
 	}
 
 	newPlayer, err := s.queries.WithTx(tx).AddPlayer(ctx, sqlc.AddPlayerParams{
