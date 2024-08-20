@@ -29,17 +29,7 @@ func NewRoomService(store Storer, randomizer Randomizer) *RoomService {
 }
 
 func (r *RoomService) Create(ctx context.Context, gameName string, player entities.NewHostPlayer) (entities.Room, error) {
-	nickname := player.Nickname
-	if player.Nickname == "" {
-		nickname = r.randomizer.GetNickname()
-	}
-
-	avatar := r.randomizer.GetAvatar()
-	newPlayer := entities.NewPlayer{
-		ID:       player.ID,
-		Nickname: nickname,
-		Avatar:   avatar,
-	}
+	newPlayer := r.getNewPlayer(player.Nickname, player.ID)
 
 	newRoom := entities.NewRoom{
 		GameName: gameName,
@@ -54,8 +44,8 @@ func (r *RoomService) Create(ctx context.Context, gameName string, player entiti
 		Players: []entities.Player{
 			{
 				ID:       player.ID,
-				Nickname: nickname,
-				Avatar:   string(avatar),
+				Nickname: newPlayer.Nickname,
+				Avatar:   string(newPlayer.Avatar),
 			},
 		},
 	}
@@ -63,6 +53,18 @@ func (r *RoomService) Create(ctx context.Context, gameName string, player entiti
 }
 
 func (r *RoomService) Join(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error) {
+	newPlayer := r.getNewPlayer(playerNickname, playerID)
+	// TODO: nickname exists in room
+	playerRows, err := r.store.AddPlayerToRoom(ctx, newPlayer, roomCode)
+	if err != nil {
+		return entities.Room{}, err
+	}
+
+	room := getRoom(playerRows, roomCode)
+	return room, nil
+}
+
+func (r *RoomService) getNewPlayer(playerNickname string, playerID string) entities.NewPlayer {
 	nickname := playerNickname
 	if playerNickname == "" {
 		nickname = r.randomizer.GetNickname()
@@ -74,12 +76,5 @@ func (r *RoomService) Join(ctx context.Context, roomCode string, playerID string
 		Nickname: nickname,
 		Avatar:   avatar,
 	}
-
-	playerRows, err := r.store.AddPlayerToRoom(ctx, newPlayer, roomCode)
-	if err != nil {
-		return entities.Room{}, err
-	}
-
-	room := getRoom(playerRows, roomCode)
-	return room, nil
+	return newPlayer
 }
