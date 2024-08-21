@@ -16,7 +16,7 @@ import (
 	"gitlab.com/hmajid2301/banterbus/internal/service"
 	"gitlab.com/hmajid2301/banterbus/internal/store"
 	transporthttp "gitlab.com/hmajid2301/banterbus/internal/transport/http"
-	"gitlab.com/hmajid2301/banterbus/internal/transport/ws"
+	"gitlab.com/hmajid2301/banterbus/internal/transport/websockets"
 )
 
 //go:embed db/schema.sql
@@ -63,9 +63,11 @@ func mainLogic(ctx context.Context, logger *slog.Logger) error {
 		return fmt.Errorf("failed to setup store: %w", err)
 	}
 
-	roomServicer := service.NewRoomService(myStore)
-	playerServicer := service.NewPlayerService(myStore)
-	subscriber := ws.NewSubscriber(roomServicer, playerServicer, logger)
+	userRandomizer := service.NewUserRandomizer()
+	roomServicer := service.NewRoomService(myStore, userRandomizer)
+	playerServicer := service.NewPlayerService(myStore, userRandomizer)
+
+	subscriber := websockets.NewSubscriber(roomServicer, playerServicer, logger)
 	server := transporthttp.NewServer(subscriber, logger)
 
 	err = server.Serve()
