@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/hmajid2301/banterbus/internal/banterbustest"
+	"gitlab.com/hmajid2301/banterbus/internal/entities"
 	"gitlab.com/hmajid2301/banterbus/internal/service"
 	"gitlab.com/hmajid2301/banterbus/internal/store"
 	"gitlab.com/hmajid2301/banterbus/internal/transport/websockets"
@@ -66,31 +67,31 @@ func TestIntegrationSubscribe(t *testing.T) {
 		assert.Regexp(t, "Code: [A-Z0-9]{5}", msg)
 	})
 
-	// t.Run("Should successfully handle join room message", func(t *testing.T) {
-	// 	room, err := roomServicer.Create(ctx, "fibbing_it", entities.NewHostPlayer{
-	// 		ID: "fake_id",
-	// 	})
-	// 	require.NoError(t, err)
-	//
-	// 	playerNickname := "test"
-	// 	message := map[string]string{
-	// 		"room_code":       room.Code,
-	// 		"player_nickname": playerNickname,
-	// 		"message_type":    "join_room",
-	// 	}
-	//
-	// 	jsonMessage, err := json.Marshal(message)
-	// 	require.NoError(t, err)
-	//
-	// 	err = wsutil.WriteClientText(conn, jsonMessage)
-	// 	require.NoError(t, err)
-	//
-	// 	m, op, err := wsutil.ReadServerData(conn)
-	// 	require.NoError(t, err)
-	// 	msg := string(m)
-	//
-	// 	assert.Equal(t, ws.OpText, op)
-	// 	assert.Contains(t, msg, playerNickname)
-	// 	assert.Regexp(t, "Code: [A-Z0-9]{5}", msg)
-	// })
+	t.Run("Should successfully handle join room message", func(t *testing.T) {
+		room, err := roomServicer.Create(ctx, "fibbing_it", entities.NewHostPlayer{
+			ID: "fake_id",
+		})
+		require.NoError(t, err)
+
+		playerNickname := "test"
+		message := map[string]string{
+			"room_code":       room.Code,
+			"player_nickname": playerNickname,
+			"message_type":    "join_room",
+		}
+		//
+		jsonMessage, err := json.Marshal(message)
+		require.NoError(t, err)
+
+		err = wsutil.WriteClientText(conn, jsonMessage)
+		require.NoError(t, err)
+
+		m, op, err := wsutil.ReadServerData(conn)
+		require.NoError(t, err)
+		msg := string(m)
+
+		assert.Equal(t, ws.OpText, op)
+		assert.Contains(t, msg, playerNickname)
+		assert.Regexp(t, "Code: [A-Z0-9]{5}", msg)
+	})
 }
