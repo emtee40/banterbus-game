@@ -31,7 +31,11 @@ type WSHandler interface {
 	Handle(ctx context.Context, client *client, sub *subscriber) error
 }
 
-func NewSubscriber(roomServicer RoomServicer, playerServicer PlayerServicer, logger *slog.Logger) *subscriber {
+func NewSubscriber(
+	roomServicer RoomServicer,
+	playerServicer PlayerServicer,
+	logger *slog.Logger,
+) *subscriber {
 	s := &subscriber{
 		roomServicer:   roomServicer,
 		playerServicer: playerServicer,
@@ -48,7 +52,11 @@ func NewSubscriber(roomServicer RoomServicer, playerServicer PlayerServicer, log
 	return s
 }
 
-func (s *subscriber) Subscribe(ctx context.Context, r *http.Request, w http.ResponseWriter) (err error) {
+func (s *subscriber) Subscribe(
+	ctx context.Context,
+	r *http.Request,
+	w http.ResponseWriter,
+) (err error) {
 	connection, _, _, err := ws.UpgradeHTTP(r, w)
 	if err != nil {
 		return err
@@ -82,7 +90,12 @@ func (s *subscriber) Subscribe(ctx context.Context, r *http.Request, w http.Resp
 	}
 }
 
-func (s *subscriber) handleMessage(ctx context.Context, quit <-chan struct{}, connection net.Conn, client *client) {
+func (s *subscriber) handleMessage(
+	ctx context.Context,
+	quit <-chan struct{},
+	connection net.Conn,
+	client *client,
+) {
 	// TODO: how to handle error?
 	for {
 		select {

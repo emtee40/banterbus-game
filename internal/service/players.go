@@ -17,7 +17,11 @@ func NewPlayerService(store Storer, randomizer Randomizer) *PlayerService {
 }
 
 // TODO: add nickname check exists
-func (p *PlayerService) UpdateNickname(ctx context.Context, nickname string, playerID string) (entities.Room, error) {
+func (p *PlayerService) UpdateNickname(
+	ctx context.Context,
+	nickname string,
+	playerID string,
+) (entities.Room, error) {
 	playerRows, err := p.store.UpdateNickname(ctx, nickname, playerID)
 	if err != nil {
 		return entities.Room{}, err
@@ -31,7 +35,10 @@ func (p *PlayerService) UpdateNickname(ctx context.Context, nickname string, pla
 	return room, err
 }
 
-func (p *PlayerService) GenerateNewAvatar(ctx context.Context, playerID string) (entities.Room, error) {
+func (p *PlayerService) GenerateNewAvatar(
+	ctx context.Context,
+	playerID string,
+) (entities.Room, error) {
 	avatar := p.randomizer.GetAvatar()
 
 	playerRows, err := p.store.UpdateAvatar(ctx, avatar, playerID)

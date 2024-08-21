@@ -114,7 +114,12 @@ func TestIntegrationAddPlayerToRoom(t *testing.T) {
 		assert.Len(t, players, 2, "There should be 2 players in the room")
 		assert.NoError(t, err)
 
-		assert.Equal(t, roomCode, players[0].RoomCode, "Room code should returned match created room, room code")
+		assert.Equal(
+			t,
+			roomCode,
+			players[0].RoomCode,
+			"Room code should returned match created room, room code",
+		)
 		assert.NoError(t, err)
 	})
 
@@ -129,7 +134,11 @@ func TestIntegrationAddPlayerToRoom(t *testing.T) {
 		roomCode, err := createRoom(ctx, myStore)
 		assert.NoError(t, err)
 
-		_, err = db.ExecContext(ctx, "UPDATE rooms SET room_state = 'PLAYING' WHERE room_code = ?", roomCode)
+		_, err = db.ExecContext(
+			ctx,
+			"UPDATE rooms SET room_state = 'PLAYING' WHERE room_code = ?",
+			roomCode,
+		)
 		assert.NoError(t, err)
 
 		newPlayer := entities.NewPlayer{

@@ -18,17 +18,37 @@ type Randomizer interface {
 }
 
 type Storer interface {
-	CreateRoom(ctx context.Context, player entities.NewPlayer, room entities.NewRoom) (roomCode string, err error)
-	AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, roomCode string) (players []sqlc.GetAllPlayersInRoomRow, err error)
-	UpdateNickname(ctx context.Context, nickname string, playerID string) (players []sqlc.GetAllPlayersInRoomRow, err error)
-	UpdateAvatar(ctx context.Context, avatar []byte, playerID string) (players []sqlc.GetAllPlayersInRoomRow, err error)
+	CreateRoom(
+		ctx context.Context,
+		player entities.NewPlayer,
+		room entities.NewRoom,
+	) (roomCode string, err error)
+	AddPlayerToRoom(
+		ctx context.Context,
+		player entities.NewPlayer,
+		roomCode string,
+	) (players []sqlc.GetAllPlayersInRoomRow, err error)
+	UpdateNickname(
+		ctx context.Context,
+		nickname string,
+		playerID string,
+	) (players []sqlc.GetAllPlayersInRoomRow, err error)
+	UpdateAvatar(
+		ctx context.Context,
+		avatar []byte,
+		playerID string,
+	) (players []sqlc.GetAllPlayersInRoomRow, err error)
 }
 
 func NewRoomService(store Storer, randomizer Randomizer) *RoomService {
 	return &RoomService{store: store, randomizer: randomizer}
 }
 
-func (r *RoomService) Create(ctx context.Context, gameName string, player entities.NewHostPlayer) (entities.Room, error) {
+func (r *RoomService) Create(
+	ctx context.Context,
+	gameName string,
+	player entities.NewHostPlayer,
+) (entities.Room, error) {
 	newPlayer := r.getNewPlayer(player.Nickname, player.ID)
 
 	newRoom := entities.NewRoom{
@@ -52,7 +72,12 @@ func (r *RoomService) Create(ctx context.Context, gameName string, player entiti
 	return room, nil
 }
 
-func (r *RoomService) Join(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error) {
+func (r *RoomService) Join(
+	ctx context.Context,
+	roomCode string,
+	playerID string,
+	playerNickname string,
+) (entities.Room, error) {
 	newPlayer := r.getNewPlayer(playerNickname, playerID)
 	// TODO: nickname exists in room
 	playerRows, err := r.store.AddPlayerToRoom(ctx, newPlayer, roomCode)

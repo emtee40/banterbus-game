@@ -62,7 +62,11 @@ func TestIntegrationUpdateNickname(t *testing.T) {
 		roomCode, err := myStore.CreateRoom(ctx, newPlayer, newRoom)
 		assert.NoError(t, err)
 
-		_, err = db.ExecContext(ctx, "UPDATE rooms SET room_state = 'PLAYING' WHERE room_code = ?", roomCode)
+		_, err = db.ExecContext(
+			ctx,
+			"UPDATE rooms SET room_state = 'PLAYING' WHERE room_code = ?",
+			roomCode,
+		)
 		assert.NoError(t, err)
 
 		_, err = myStore.UpdateNickname(ctx, "Majiy01", newPlayer.ID)
@@ -122,7 +126,11 @@ func TestIntegrationUpdatePlayer(t *testing.T) {
 		roomCode, err := myStore.CreateRoom(ctx, newPlayer, newRoom)
 		assert.NoError(t, err)
 
-		_, err = db.ExecContext(ctx, "UPDATE rooms SET room_state = 'PLAYING' WHERE room_code = ?", roomCode)
+		_, err = db.ExecContext(
+			ctx,
+			"UPDATE rooms SET room_state = 'PLAYING' WHERE room_code = ?",
+			roomCode,
+		)
 		assert.NoError(t, err)
 
 		_, err = myStore.UpdateAvatar(ctx, []byte("123456"), newPlayer.ID)

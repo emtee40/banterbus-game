@@ -30,7 +30,11 @@ func (h *UpdateNicknameEvent) Handle(ctx context.Context, client *client, sub *s
 	return err
 }
 
-func (h *GenerateNewAvatarEvent) Handle(ctx context.Context, client *client, sub *subscriber) error {
+func (h *GenerateNewAvatarEvent) Handle(
+	ctx context.Context,
+	client *client,
+	sub *subscriber,
+) error {
 	updatedRoom, err := sub.playerServicer.GenerateNewAvatar(ctx, h.PlayerID)
 	if err != nil {
 		return err

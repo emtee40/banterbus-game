@@ -6,13 +6,22 @@ import (
 	"fmt"
 
 	"gitlab.com/hmajid2301/banterbus/internal/entities"
-	"gitlab.com/hmajid2301/banterbus/internal/views"
+	"gitlab.com/hmajid2301/banterbus/internal/transport/ws/views"
 )
 
 // TODO: refactor to another package
 type RoomServicer interface {
-	Create(ctx context.Context, gameName string, player entities.NewHostPlayer) (entities.Room, error)
-	Join(ctx context.Context, roomCode string, playerID string, playerNickname string) (entities.Room, error)
+	Create(
+		ctx context.Context,
+		gameName string,
+		player entities.NewHostPlayer,
+	) (entities.Room, error)
+	Join(
+		ctx context.Context,
+		roomCode string,
+		playerID string,
+		playerNickname string,
+	) (entities.Room, error)
 }
 
 type CreateRoomEvent struct {

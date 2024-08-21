@@ -45,7 +45,11 @@ func NewStore(db *sql.DB) (Store, error) {
 	return store, nil
 }
 
-func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room entities.NewRoom) (roomCode string, err error) {
+func (s Store) CreateRoom(
+	ctx context.Context,
+	player entities.NewPlayer,
+	room entities.NewRoom,
+) (roomCode string, err error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return roomCode, err
@@ -55,7 +59,11 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 		if err != nil {
 			rbErr := tx.Rollback()
 			if rbErr != nil {
-				err = fmt.Errorf("failed to rollback: %w; while handling this error: %w", rbErr, err)
+				err = fmt.Errorf(
+					"failed to rollback: %w; while handling this error: %w",
+					rbErr,
+					err,
+				)
 			}
 		}
 	}()
@@ -107,7 +115,11 @@ func (s Store) CreateRoom(ctx context.Context, player entities.NewPlayer, room e
 	return roomCode, tx.Commit()
 }
 
-func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, roomCode string) (players []sqlc.GetAllPlayersInRoomRow, err error) {
+func (s Store) AddPlayerToRoom(
+	ctx context.Context,
+	player entities.NewPlayer,
+	roomCode string,
+) (players []sqlc.GetAllPlayersInRoomRow, err error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return players, err
@@ -117,7 +129,11 @@ func (s Store) AddPlayerToRoom(ctx context.Context, player entities.NewPlayer, r
 		if err != nil {
 			rbErr := tx.Rollback()
 			if rbErr != nil {
-				err = fmt.Errorf("failed to rollback: %w; while handling this error: %w", rbErr, err)
+				err = fmt.Errorf(
+					"failed to rollback: %w; while handling this error: %w",
+					rbErr,
+					err,
+				)
 			}
 		}
 	}()

@@ -19,16 +19,22 @@ func TestPlayerServiceUpdateNickname(t *testing.T) {
 		service := service.NewPlayerService(mockStore, mockRandom)
 
 		ctx := context.Background()
-		mockStore.EXPECT().UpdateNickname(ctx, "new_nickname", "fbb75599-9f7a-4392-b523-fd433b3208ea").Return([]sqlc.GetAllPlayersInRoomRow{
-			{
-				ID:       "b75599-9f7a-4392-b523-fd433b3208ea",
-				Nickname: "new_nickname",
-				Avatar:   []byte(""),
-				RoomCode: "ABC12",
-			},
-		}, nil)
+		mockStore.EXPECT().
+			UpdateNickname(ctx, "new_nickname", "fbb75599-9f7a-4392-b523-fd433b3208ea").
+			Return([]sqlc.GetAllPlayersInRoomRow{
+				{
+					ID:       "b75599-9f7a-4392-b523-fd433b3208ea",
+					Nickname: "new_nickname",
+					Avatar:   []byte(""),
+					RoomCode: "ABC12",
+				},
+			}, nil)
 
-		room, err := service.UpdateNickname(ctx, "new_nickname", "fbb75599-9f7a-4392-b523-fd433b3208ea")
+		room, err := service.UpdateNickname(
+			ctx,
+			"new_nickname",
+			"fbb75599-9f7a-4392-b523-fd433b3208ea",
+		)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "ABC12", room.Code)
@@ -42,8 +48,14 @@ func TestPlayerServiceUpdateNickname(t *testing.T) {
 		service := service.NewPlayerService(mockStore, mockRandom)
 
 		ctx := context.Background()
-		mockStore.EXPECT().UpdateNickname(ctx, "new_nickname", "fbb75599-9f7a-4392-b523-fd433b3208ea").Return([]sqlc.GetAllPlayersInRoomRow{}, fmt.Errorf("failed to update nickname"))
-		_, err := service.UpdateNickname(ctx, "new_nickname", "fbb75599-9f7a-4392-b523-fd433b3208ea")
+		mockStore.EXPECT().
+			UpdateNickname(ctx, "new_nickname", "fbb75599-9f7a-4392-b523-fd433b3208ea").
+			Return([]sqlc.GetAllPlayersInRoomRow{}, fmt.Errorf("failed to update nickname"))
+		_, err := service.UpdateNickname(
+			ctx,
+			"new_nickname",
+			"fbb75599-9f7a-4392-b523-fd433b3208ea",
+		)
 		assert.Error(t, err)
 	})
 }
@@ -56,14 +68,16 @@ func TestPlayerServiceGenerateAvatar(t *testing.T) {
 
 		ctx := context.Background()
 		mockRandom.EXPECT().GetAvatar().Return([]byte("123"))
-		mockStore.EXPECT().UpdateAvatar(ctx, []byte("123"), "fbb75599-9f7a-4392-b523-fd433b3208ea").Return([]sqlc.GetAllPlayersInRoomRow{
-			{
-				ID:       "fbb75599-9f7a-4392-b523-fd433b3208ea",
-				Nickname: "Majiy00",
-				Avatar:   []byte("123"),
-				RoomCode: "ABC12",
-			},
-		}, nil)
+		mockStore.EXPECT().
+			UpdateAvatar(ctx, []byte("123"), "fbb75599-9f7a-4392-b523-fd433b3208ea").
+			Return([]sqlc.GetAllPlayersInRoomRow{
+				{
+					ID:       "fbb75599-9f7a-4392-b523-fd433b3208ea",
+					Nickname: "Majiy00",
+					Avatar:   []byte("123"),
+					RoomCode: "ABC12",
+				},
+			}, nil)
 
 		room, err := service.GenerateNewAvatar(ctx, "fbb75599-9f7a-4392-b523-fd433b3208ea")
 
@@ -80,7 +94,9 @@ func TestPlayerServiceGenerateAvatar(t *testing.T) {
 
 		ctx := context.Background()
 		mockRandom.EXPECT().GetAvatar().Return([]byte("123"))
-		mockStore.EXPECT().UpdateAvatar(ctx, []byte("123"), "fbb75599-9f7a-4392-b523-fd433b3208ea").Return([]sqlc.GetAllPlayersInRoomRow{}, fmt.Errorf("failed to generate new avatar"))
+		mockStore.EXPECT().
+			UpdateAvatar(ctx, []byte("123"), "fbb75599-9f7a-4392-b523-fd433b3208ea").
+			Return([]sqlc.GetAllPlayersInRoomRow{}, fmt.Errorf("failed to generate new avatar"))
 		_, err := service.GenerateNewAvatar(ctx, "fbb75599-9f7a-4392-b523-fd433b3208ea")
 		assert.Error(t, err)
 	})
